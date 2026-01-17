@@ -1,9 +1,0 @@
-name = "insightmate-dashboard"
-compatibility_date = "2024-01-01"
-pages_build_output_dir = "dist"
-
-[env.production.vars]
-API_BASE_URL = "https://insightmate-api.rachit1031.workers.dev"
-
-[env.preview.vars]
-API_BASE_URL = "https://insightmate-api.rachit1031.workers.dev"
