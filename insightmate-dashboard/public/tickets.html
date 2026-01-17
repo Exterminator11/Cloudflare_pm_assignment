@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Support Tickets - Insight Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <nav class="bg-gray-800 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
+      <h1 class="text-xl font-bold">Insight Dashboard</h1>
+      <div class="space-x-2 mt-2 sm:mt-0">
+        <a href="tickets.html" class="px-3 py-2 rounded bg-gray-700 text-blue-400 transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-2 rounded hover:bg-gray-700 text-indigo-400 transition">Discord</a>
+        <a href="github.html" class="px-3 py-2 rounded hover:bg-gray-700 text-purple-400 transition">GitHub</a>
+        <a href="email.html" class="px-3 py-2 rounded hover:bg-gray-700 text-red-400 transition">Email</a>
+        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-2 rounded hover:bg-gray-700 text-green-400 transition">Forum</a>
+        <a href="insights.html" class="px-3 py-2 rounded hover:bg-gray-700 text-yellow-400 transition">All Insights</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-wrap justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800">Customer Support Tickets</h2>
+      <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        Refresh
+      </button>
+    </div>
+
+    <div id="loading" class="hidden text-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+    </div>
+
+    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-blue-600 text-white">
+          <tr>
+            <th class="px-6 py-3 text-left">ID</th>
+            <th class="px-6 py-3 text-left">Ticket ID</th>
+            <th class="px-6 py-3 text-left">Content</th>
+            <th class="px-6 py-3 text-left">Status</th>
+            <th class="px-6 py-3 text-left">User</th>
+            <th class="px-6 py-3 text-left">Created</th>
+          </tr>
+        </thead>
+        <tbody id="data" class="divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+
+    <div id="empty" class="hidden text-center py-12 text-gray-500">
+      No tickets found
+    </div>
+  </main>
+
+  <script src="shared.js"></script>
+  <script>
+    async function loadData() {
+      showLoading('loading');
+      hideError('error');
+      try {
+        const tickets = await fetchTickets();
+        renderTable(tickets);
+      } catch (err) {
+        showError('error', 'Failed to load tickets: ' + err.message);
+      } finally {
+        hideLoading('loading');
+      }
+    }
+
+    function renderTable(tickets) {
+      const tbody = document.getElementById('data');
+      const empty = document.getElementById('empty');
+
+      if (!tickets || tickets.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      tbody.innerHTML = tickets.map(t => `
+        <tr class="hover:bg-gray-50 transition">
+          <td class="px-6 py-4">${t.id}</td>
+          <td class="px-6 py-4 font-mono text-sm">${t.ticket_id}</td>
+          <td class="px-6 py-4 max-w-md truncate">${t.content}</td>
+          <td class="px-6 py-4">
+            <span class="px-2 py-1 text-xs font-semibold rounded ${
+              t.status === 'open' ? 'bg-green-100 text-green-800' :
+              t.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+              t.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-blue-100 text-blue-800'
+            }">${t.status}</span>
+          </td>
+          <td class="px-6 py-4 font-mono text-sm">${t.user_id}</td>
+          <td class="px-6 py-4 text-sm text-gray-600">${formatDate(t.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
