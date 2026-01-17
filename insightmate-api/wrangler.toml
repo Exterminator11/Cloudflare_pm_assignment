@@ -1,0 +1,8 @@
+name = "insightmate-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "insightmate_db"
+database_name = "insightmate-db"
+database_id = "4d5365c9-e031-4ba1-be82-1410b20183e7"
