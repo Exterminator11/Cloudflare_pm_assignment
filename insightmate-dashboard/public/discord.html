@@ -6,96 +6,245 @@
   <title>Discord Messages - Insight Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <nav class="bg-gray-800 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-xl font-bold">Insight Dashboard</h1>
-      <div class="space-x-2 mt-2 sm:mt-0">
-        <a href="tickets.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Tickets</a>
-        <a href="discord.html" class="px-3 py-2 rounded bg-gray-700 text-indigo-400 transition">Discord</a>
-        <a href="github.html" class="px-3 py-2 rounded hover:bg-gray-700 text-purple-400 transition">GitHub</a>
-        <a href="email.html" class="px-3 py-2 rounded hover:bg-gray-700 text-red-400 transition">Email</a>
-        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
-        <a href="forum.html" class="px-3 py-2 rounded hover:bg-gray-700 text-green-400 transition">Forum</a>
-        <a href="insights.html" class="px-3 py-2 rounded hover:bg-gray-700 text-yellow-400 transition">All Insights</a>
+<body class="bg-white min-h-screen flex flex-col">
+  <nav class="bg-[#F38020] text-black shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">Insight Dashboard</a>
+      <div class="flex gap-1 mt-2 sm:mt-0 text-sm">
+        <a href="insights.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">All Insights</a>
+        <a href="tickets.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-1.5 rounded bg-black text-white transition">Discord</a>
+        <a href="github.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">GitHub</a>
+        <a href="email.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Email</a>
+        <a href="twitter.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Forum</a>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-wrap justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold text-gray-800">Discord Messages</h2>
-      <button onclick="loadData()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+  <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+    <div class="flex flex-wrap justify-between items-center mb-8">
+      <h1 class="text-2xl font-light tracking-tight text-black">Discord Messages</h1>
+      <button onclick="loadDiscordData()" class="px-5 py-2 bg-[#F38020] text-black rounded-lg font-medium hover:bg-[#E57010] transition-colors">
         Refresh
       </button>
     </div>
 
-    <div id="loading" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent mx-auto"></div>
+    <div id="loading" class="hidden flex justify-center py-16">
+      <div class="w-10 h-10 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+    <div id="error" class="hidden bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6"></div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
-        <thead class="bg-indigo-600 text-white">
-          <tr>
-            <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">Message ID</th>
-            <th class="px-6 py-3 text-left">Channel</th>
-            <th class="px-6 py-3 text-left">Content</th>
-            <th class="px-6 py-3 text-left">Author</th>
-            <th class="px-6 py-3 text-left">Created</th>
-          </tr>
-        </thead>
-        <tbody id="data" class="divide-y divide-gray-200"></tbody>
-      </table>
+    <!-- AI Announcements Section -->
+    <div id="ai-announcements" class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-[#F38020]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+          </svg>
+          <h2 class="text-xl font-medium text-black">AI Announcement Detection</h2>
+        </div>
+
+      </div>
+
+      <div class="bg-gradient-to-br from-[#F38020]/10 to-orange-50 rounded-xl p-5 mb-6">
+        <h3 class="text-sm font-medium text-gray-500 uppercase mb-2">Summary</h3>
+        <p id="announcement-summary" class="text-gray-700">Loading AI analysis...</p>
+      </div>
+
+      <div id="announcements-list" class="space-y-4"></div>
     </div>
 
-    <div id="empty" class="hidden text-center py-12 text-gray-500">
+    <!-- Channel Groups -->
+    <div id="channels" class="space-y-6"></div>
+
+    <div id="empty" class="hidden text-center py-16 text-gray-400">
       No Discord messages found
     </div>
   </main>
 
+  <footer class="border-t border-gray-100 py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-400">
+      Insight Dashboard &mdash; Powered by Cloudflare Workers
+    </div>
+  </footer>
+
   <script src="shared.js"></script>
   <script>
-    async function loadData() {
+    let currentPage = {};
+    let messagesByChannel = {};
+    const MESSAGES_PER_PAGE = 10;
+
+    async function loadDiscordData() {
       showLoading('loading');
       hideError('error');
       try {
-        const messages = await fetchDiscord();
-        renderTable(messages);
+        const [messages, analysis] = await Promise.all([
+          fetchDiscord(),
+          loadDiscordAnalysis()
+        ]);
+        messagesByChannel = groupMessagesByChannel(messages);
+        renderChannels();
       } catch (err) {
-        showError('error', 'Failed to load Discord messages: ' + err.message);
+        showError('error', 'Failed to load Discord data: ' + err.message);
       } finally {
         hideLoading('loading');
       }
     }
 
-    function renderTable(messages) {
-      const tbody = document.getElementById('data');
+    async function loadDiscordAnalysis() {
+      try {
+        const analysis = await fetchDiscordAnalysis();
+        renderAnnouncements(analysis.announcements, analysis.summary);
+      } catch (err) {
+        console.error('Announcement analysis failed:', err);
+        document.getElementById('announcement-summary').textContent = 'Failed to load AI analysis';
+      }
+    }
+
+    function groupMessagesByChannel(messages) {
+      const grouped = {};
+      messages.forEach(m => {
+        if (!grouped[m.channel_id]) {
+          grouped[m.channel_id] = [];
+        }
+        grouped[m.channel_id].push(m);
+      });
+
+      // Sort messages within each channel by date (newest first)
+      Object.keys(grouped).forEach(channelId => {
+        grouped[channelId].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      });
+
+      return grouped;
+    }
+
+    function renderAnnouncements(announcements, summary) {
+      document.getElementById('announcement-summary').textContent = summary;
+
+      const list = document.getElementById('announcements-list');
+      if (!announcements || announcements.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-4">No significant announcements detected</p>';
+        return;
+      }
+
+      list.innerHTML = announcements.map(a => `
+        <div class="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow">
+          <div class="flex items-start gap-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h4 class="font-medium text-black">${a.title}</h4>
+                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                  ${Math.round(a.confidence * 100)}% confidence
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">${a.description}</p>
+              <div class="flex flex-wrap gap-2">
+                ${a.key_points.map(p => `<span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">${p}</span>`).join('')}
+              </div>
+              ${a.channel ? `<p class="text-xs text-gray-400 mt-2">Channel: ${a.channel}</p>` : ''}
+            </div>
+            <svg class="w-5 h-5 text-[#F38020] flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+            </svg>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderChannels() {
+      const container = document.getElementById('channels');
       const empty = document.getElementById('empty');
 
-      if (!messages || messages.length === 0) {
-        tbody.innerHTML = '';
+      if (Object.keys(messagesByChannel).length === 0) {
+        container.innerHTML = '';
         empty.classList.remove('hidden');
         return;
       }
 
       empty.classList.add('hidden');
-      tbody.innerHTML = messages.map(m => `
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-6 py-4">${m.id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${m.message_id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${m.channel_id}</td>
-          <td class="px-6 py-4 max-w-md truncate">${m.content}</td>
-          <td class="px-6 py-4 font-mono text-sm">${m.author_id}</td>
-          <td class="px-6 py-4 text-sm text-gray-600">${formatDate(m.created_at)}</td>
-        </tr>
+
+      // Sort channels by message count (most active first)
+      const sortedChannels = Object.entries(messagesByChannel)
+        .sort((a, b) => b[1].length - a[1].length);
+
+      container.innerHTML = sortedChannels.map(([channelId, messages]) => `
+        <details class="group/section border border-gray-100 rounded-xl overflow-hidden">
+          <summary class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-gray-100 list-none">
+            <svg class="w-5 h-5 text-gray-500 group-open/section:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="font-mono text-sm text-gray-600">${channelId}</span>
+            <span class="ml-auto px-2 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">${messages.length}</span>
+          </summary>
+          <div id="channel-messages-${channelId}" class="divide-y divide-gray-50">
+            ${renderChannelMessages(channelId, 1)}
+          </div>
+          ${messages.length > MESSAGES_PER_PAGE ? `
+            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 text-center">
+              <button onclick="loadMoreMessages('${channelId}')" class="px-4 py-2 bg-[#F38020] text-black text-sm font-medium rounded hover:bg-[#E57010] transition-colors">
+                Load More Messages
+              </button>
+            </div>
+          ` : ''}
+        </details>
       `).join('');
     }
 
-    loadData();
+    function renderChannelMessages(channelId, page) {
+      const messages = messagesByChannel[channelId];
+      const startIndex = 0;
+      const endIndex = page * MESSAGES_PER_PAGE;
+      const messagesToShow = messages.slice(startIndex, endIndex);
+
+      return messagesToShow.map(m => `
+        <div class="px-5 py-4 hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-mono text-xs text-gray-500">${m.author_id}</span>
+            <span class="text-xs text-gray-400">${formatDate(m.created_at)}</span>
+          </div>
+          <p class="text-sm text-gray-900">${m.content}</p>
+        </div>
+      `).join('');
+    }
+
+    function loadMoreMessages(channelId) {
+      const currentPageNum = currentPage[channelId] || 1;
+      const nextPage = currentPageNum + 1;
+      currentPage[channelId] = nextPage;
+
+      const messages = messagesByChannel[channelId];
+      const startIndex = (nextPage - 1) * MESSAGES_PER_PAGE;
+      const endIndex = nextPage * MESSAGES_PER_PAGE;
+      const newMessages = messages.slice(startIndex, endIndex);
+
+      if (newMessages.length > 0) {
+        const container = document.getElementById(`channel-messages-${channelId}`);
+        const loadMoreBtn = container.nextElementSibling;
+
+        // Add new messages
+        newMessages.forEach(m => {
+          const messageElement = document.createElement('div');
+          messageElement.className = 'px-5 py-4 hover:bg-gray-50 transition-colors';
+          messageElement.innerHTML = `
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-mono text-xs text-gray-500">${m.author_id}</span>
+              <span class="text-xs text-gray-400">${formatDate(m.created_at)}</span>
+            </div>
+            <p class="text-sm text-gray-900">${m.content}</p>
+          `;
+          container.appendChild(messageElement);
+        });
+
+        // Hide load more button if we've shown all messages
+        if (endIndex >= messages.length) {
+          loadMoreBtn.style.display = 'none';
+        }
+      }
+    }
+
+    loadDiscordData();
   </script>
 </body>
 </html>

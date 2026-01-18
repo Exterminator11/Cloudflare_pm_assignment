@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8789';
+const API_BASE = 'https://insight-api.rachit1031.workers.dev';
 
 async function fetchAPI(endpoint) {
   try {
@@ -14,11 +14,21 @@ async function fetchAPI(endpoint) {
 
 async function fetchTickets() { return fetchAPI('/api/tickets'); }
 async function fetchDiscord() { return fetchAPI('/api/discord'); }
+async function fetchDiscordAnalysis() { return fetchAPI('/api/discord/analysis'); }
+async function fetchEmailAnalysis() { return fetchAPI('/api/email/analysis'); }
+async function fetchEmailSimilar(emailId) { return fetchAPI(`/api/email/similar/${emailId}`); }
+async function fetchGithubAnalysis() { return fetchAPI('/api/github/analysis'); }
 async function fetchGithub() { return fetchAPI('/api/github'); }
 async function fetchEmail() { return fetchAPI('/api/email'); }
 async function fetchTwitter() { return fetchAPI('/api/twitter'); }
+async function fetchTwitterSentiment(days = 30) { return fetchAPI(`/api/twitter/analysis?days=${days}`); }
+async function fetchTwitterSentimentOverTime(period = 'daily') { return fetchAPI(`/api/twitter/sentiment-over-time?period=${period}`); }
+async function fetchTwitterFeatures(days = 90) { return fetchAPI(`/api/twitter/features?days=${days}`); }
+async function fetchTwitterOverallSentiment() { return fetchAPI('/api/twitter/overall-sentiment'); }
 async function fetchForum() { return fetchAPI('/api/forum'); }
+async function fetchForumAnalysis() { return fetchAPI('/api/forum/analysis'); }
 async function fetchInsights() { return fetchAPI('/api/insights'); }
+async function fetchTicketAnalysis() { return fetchAPI('/api/tickets/analysis'); }
 
 function formatDate(dateStr) {
   if (!dateStr) return '-';
@@ -41,6 +51,11 @@ function showError(id, message) {
     el.textContent = message;
     el.classList.remove('hidden');
   }
+}
+
+function hideError(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('hidden');
 }
 
 function getColor(source) {

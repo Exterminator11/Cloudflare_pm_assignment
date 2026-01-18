@@ -3,6 +3,8 @@ import { z } from "zod";
 
 export interface Env {
 	DB: D1Database;
+	AI: Ai;
+	EMAIL_VECTORS: Vectorize;
 }
 
 export const TicketSchema = z.object({

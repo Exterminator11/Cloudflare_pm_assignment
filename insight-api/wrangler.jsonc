@@ -16,6 +16,15 @@
 			"database_name": "insights-db",
 			"database_id": "82a755b9-4308-47e0-b00a-84da5081fc31"
 		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			"binding": "EMAIL_VECTORS",
+			"index_name": "email-embeddings"
+		}
 	]
 	/**
 	 * Smart Placement

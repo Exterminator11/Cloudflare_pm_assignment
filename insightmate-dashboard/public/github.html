@@ -5,103 +5,324 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GitHub Issues - Insight Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <nav class="bg-gray-800 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-xl font-bold">Insight Dashboard</h1>
-      <div class="space-x-2 mt-2 sm:mt-0">
-        <a href="tickets.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Tickets</a>
-        <a href="discord.html" class="px-3 py-2 rounded hover:bg-gray-700 text-indigo-400 transition">Discord</a>
-        <a href="github.html" class="px-3 py-2 rounded bg-gray-700 text-purple-400 transition">GitHub</a>
-        <a href="email.html" class="px-3 py-2 rounded hover:bg-gray-700 text-red-400 transition">Email</a>
-        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
-        <a href="forum.html" class="px-3 py-2 rounded hover:bg-gray-700 text-green-400 transition">Forum</a>
-        <a href="insights.html" class="px-3 py-2 rounded hover:bg-gray-700 text-yellow-400 transition">All Insights</a>
+<body class="bg-white min-h-screen flex flex-col">
+  <nav class="bg-[#F38020] text-black shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">Insight Dashboard</a>
+      <div class="flex gap-1 mt-2 sm:mt-0 text-sm">
+        <a href="insights.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">All Insights</a>
+        <a href="tickets.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Discord</a>
+        <a href="github.html" class="px-3 py-1.5 rounded bg-black text-white transition">GitHub</a>
+        <a href="email.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Email</a>
+        <a href="twitter.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Forum</a>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-wrap justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold text-gray-800">GitHub Issues</h2>
-      <button onclick="loadData()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
+  <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+    <div class="flex flex-wrap justify-between items-center mb-8">
+      <h1 class="text-2xl font-light tracking-tight text-black">GitHub Issues</h1>
+      <button onclick="loadAllData()" class="px-5 py-2 bg-[#F38020] text-black rounded-lg font-medium hover:bg-[#E57010] transition-colors">
         Refresh
       </button>
     </div>
 
-    <div id="loading" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent mx-auto"></div>
+    <div id="loading" class="hidden flex justify-center py-16">
+      <div class="w-10 h-10 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+    <div id="error" class="hidden bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6"></div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
-        <thead class="bg-purple-600 text-white">
-          <tr>
-            <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">Issue ID</th>
-            <th class="px-6 py-3 text-left">Repository</th>
-            <th class="px-6 py-3 text-left">Title</th>
-            <th class="px-6 py-3 text-left">State</th>
-            <th class="px-6 py-3 text-left">Created</th>
-          </tr>
-        </thead>
-        <tbody id="data" class="divide-y divide-gray-200"></tbody>
-      </table>
+    <!-- Issues by State -->
+    <div id="issues-by-state" class="space-y-6 mb-12"></div>
+
+    <!-- AI Application Analysis Section -->
+    <div id="ai-analysis" class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-[#F38020]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+          <h2 class="text-xl font-medium text-black">AI Application Analysis</h2>
+        </div>
+
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-gray-50 rounded-xl p-5">
+          <h3 class="text-sm font-medium text-gray-500 uppercase mb-4">Issues by Application Area</h3>
+          <div class="h-64 flex items-center">
+            <canvas id="categoryChart" class="w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5">
+          <h3 class="text-sm font-medium text-gray-500 uppercase mb-4">Trend Over Time</h3>
+          <div class="h-64 flex items-center">
+            <canvas id="trendChart" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+        <div class="lg:col-span-2 bg-gradient-to-br from-[#F38020]/10 to-orange-50 rounded-xl p-5">
+          <h3 class="text-sm font-medium text-gray-500 uppercase mb-3">AI Engineering Recommendations</h3>
+          <div id="ai-advice" class="text-sm text-gray-700 space-y-3">
+            <p class="text-gray-400">Loading analysis...</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5">
+          <h3 class="text-sm font-medium text-gray-500 uppercase mb-3">Priority Focus Areas</h3>
+          <div id="priority-areas" class="flex flex-wrap gap-2">
+            <p class="text-gray-400 text-sm">Loading...</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="empty" class="hidden text-center py-12 text-gray-500">
+    <div id="empty" class="hidden text-center py-16 text-gray-400">
       No GitHub issues found
     </div>
   </main>
 
+  <footer class="border-t border-gray-100 py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-400">
+      Insight Dashboard &mdash; Powered by Cloudflare Workers
+    </div>
+  </footer>
+
   <script src="shared.js"></script>
   <script>
-    async function loadData() {
+    let categoryChart = null;
+    let trendChart = null;
+    let issuesByState = {};
+
+    async function loadAllData() {
       showLoading('loading');
       hideError('error');
       try {
-        const issues = await fetchGithub();
-        renderTable(issues);
+        const [issues, analysis] = await Promise.all([
+          fetchGithub(),
+          loadAIAnalysis()
+        ]);
+        issuesByState = groupIssuesByState(issues);
+        renderIssuesByState();
       } catch (err) {
-        showError('error', 'Failed to load GitHub issues: ' + err.message);
+        showError('error', 'Failed to load GitHub data: ' + err.message);
       } finally {
         hideLoading('loading');
       }
     }
 
-    function renderTable(issues) {
-      const tbody = document.getElementById('data');
+    async function loadAIAnalysis() {
+      try {
+        const analysis = await fetchGithubAnalysis();
+        renderCategoryChart(analysis.categories);
+        renderTrendChart(analysis.timeline, analysis.categories.map(c => c.name));
+        renderAIAdvice(analysis.advice, analysis.priorityAreas);
+        return analysis;
+      } catch (err) {
+        console.error('AI analysis failed:', err);
+        document.getElementById('ai-advice').innerHTML = '<p class="text-red-500">Failed to load AI analysis</p>';
+      }
+    }
+
+    function groupIssuesByState(issues) {
+      const grouped = {
+        open: [],
+        closed: []
+      };
+
+      issues.forEach(issue => {
+        const state = issue.state || 'open';
+        if (grouped[state]) {
+          grouped[state].push(issue);
+        } else {
+          grouped[state] = [issue];
+        }
+      });
+
+      return grouped;
+    }
+
+    function renderCategoryChart(categories) {
+      const canvas = document.getElementById('categoryChart');
+      const container = canvas.parentElement;
+
+      if (categoryChart) {
+        categoryChart.destroy();
+        categoryChart = null;
+      }
+
+      canvas.remove();
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = 'categoryChart';
+      newCanvas.className = 'w-full h-full';
+      container.appendChild(newCanvas);
+
+      const colors = ['#3b82f6', '#8b5cf6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6'];
+
+      categoryChart = new Chart(newCanvas, {
+        type: 'bar',
+        data: {
+          labels: categories.map(c => c.name),
+          datasets: [{
+            label: 'Issues',
+            data: categories.map(c => c.count),
+            backgroundColor: colors.slice(0, categories.length),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const cat = categories[context.dataIndex];
+                  return `${cat.count} issues (${cat.percentage}%)`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderTrendChart(timeline, categories) {
+      const canvas = document.getElementById('trendChart');
+      const container = canvas.parentElement;
+
+      if (trendChart) {
+        trendChart.destroy();
+        trendChart = null;
+      }
+
+      canvas.remove();
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = 'trendChart';
+      newCanvas.className = 'w-full h-full';
+      container.appendChild(newCanvas);
+
+      const colors = ['#3b82f6', '#8b5cf6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6'];
+
+      trendChart = new Chart(newCanvas, {
+        type: 'line',
+        data: {
+          labels: timeline.map(t => t.date),
+          datasets: categories.slice(0, 5).map((cat, i) => ({
+            label: cat,
+            data: timeline.map(t => t[cat] || 0),
+            borderColor: colors[i],
+            backgroundColor: colors[i] + '20',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, padding: 15, usePointStyle: true }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { maxTicksLimit: 7 } },
+            y: { beginAtZero: true, grid: { color: '#f3f4f6' } }
+          }
+        }
+      });
+    }
+
+    function renderAIAdvice(advice, priorityAreas) {
+      document.getElementById('ai-advice').innerHTML = `
+        <p class="leading-relaxed">${advice}</p>
+      `;
+
+      document.getElementById('priority-areas').innerHTML = priorityAreas.map(area => `
+        <span class="px-3 py-1.5 bg-[#F38020]/20 text-[#F38020] text-xs font-medium rounded-full">${area}</span>
+      `).join('');
+    }
+
+    function renderIssuesByState() {
+      const container = document.getElementById('issues-by-state');
       const empty = document.getElementById('empty');
 
-      if (!issues || issues.length === 0) {
-        tbody.innerHTML = '';
+      if (Object.keys(issuesByState).length === 0) {
+        container.innerHTML = '';
         empty.classList.remove('hidden');
         return;
       }
 
       empty.classList.add('hidden');
-      tbody.innerHTML = issues.map(i => `
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-6 py-4">${i.id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${i.issue_id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${i.repo}</td>
-          <td class="px-6 py-4 max-w-md truncate">${i.title}</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-semibold rounded ${
-              i.state === 'open' ? 'bg-green-100 text-green-800' :
-              i.state === 'closed' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }">${i.state}</span>
-          </td>
-          <td class="px-6 py-4 text-sm text-gray-600">${formatDate(i.created_at)}</td>
-        </tr>
-      `).join('');
+
+      const stateConfig = {
+        open: { label: 'Open Issues', color: 'green', icon: 'M22 11.08V12a10 10 0 1 1-5.93-9.14' },
+        closed: { label: 'Closed Issues', color: 'red', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' }
+      };
+
+      container.innerHTML = Object.entries(stateConfig).map(([state, config]) => {
+        const issues = issuesByState[state] || [];
+        if (issues.length === 0) return '';
+
+        return `
+          <details class="group/section border border-gray-100 rounded-xl overflow-hidden">
+            <summary class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-gray-100 list-none">
+              <svg class="w-5 h-5 text-${config.color}-500 group-open/section:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${config.icon}"/>
+              </svg>
+              <span class="font-medium text-black">${config.label}</span>
+              <span class="ml-auto px-2 py-1 bg-${config.color}-100 text-${config.color}-700 text-xs font-medium rounded-full">${issues.length}</span>
+            </summary>
+            <div class="divide-y divide-gray-50">
+              ${issues.slice(0, 10).map(issue => `
+                <div class="px-5 py-4 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="font-mono text-sm text-gray-500">#${issue.issue_id}</span>
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full ${
+                          issue.state === 'open' ? 'bg-green-100 text-green-700' :
+                          issue.state === 'closed' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }">${issue.state}</span>
+                      </div>
+                      <h4 class="font-medium text-black text-sm mb-1">${issue.title}</h4>
+                      <p class="text-xs text-gray-600">${issue.repo}</p>
+                    </div>
+                    <span class="text-xs text-gray-400 flex-shrink-0">${formatDate(issue.created_at)}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            ${issues.length > 10 ? `
+              <div class="px-5 py-3 bg-gray-50 border-t border-gray-100">
+                <p class="text-sm text-gray-600">Showing 10 of ${issues.length} issues</p>
+              </div>
+            ` : ''}
+          </details>
+        `;
+      }).join('');
     }
 
-    loadData();
+    loadAllData();
   </script>
 </body>
 </html>

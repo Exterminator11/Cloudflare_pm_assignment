@@ -151,11 +151,19 @@ export class EmailCollect extends OpenAPIRoute {
 	async handle(c: any) {
 		const data = await this.getValidatedData<typeof this.schema>();
 		const body = data.body;
-		const { DB } = c.env as Env;
+		const { DB, AI, EMAIL_VECTORS } = c.env as Env;
+
+		// Generate embedding for semantic search
+		const text = body.subject + " " + body.body;
+		const embedding = await AI.run("@cf/baai/bge-base-en-v1.5", { text: text });
+
+		// Insert into Vectorize
+		const vectors = [{ id: body.email_id, values: embedding.data[0] }];
+		await EMAIL_VECTORS.insert(vectors);
 
 		await DB.prepare(
-			"INSERT INTO emails (email_id, subject, body, sender) VALUES (?, ?, ?, ?)"
-		).bind(body.email_id, body.subject, body.body, body.sender).run();
+			"INSERT INTO emails (email_id, subject, body, sender, vector_id) VALUES (?, ?, ?, ?, ?)"
+		).bind(body.email_id, body.subject, body.body, body.sender, body.email_id).run();
 
 		await updateAggregated(DB, 'total_emails');
 

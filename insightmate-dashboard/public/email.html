@@ -6,64 +6,94 @@
   <title>Emails - Insight Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <nav class="bg-gray-800 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-xl font-bold">Insight Dashboard</h1>
-      <div class="space-x-2 mt-2 sm:mt-0">
-        <a href="tickets.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Tickets</a>
-        <a href="discord.html" class="px-3 py-2 rounded hover:bg-gray-700 text-indigo-400 transition">Discord</a>
-        <a href="github.html" class="px-3 py-2 rounded hover:bg-gray-700 text-purple-400 transition">GitHub</a>
-        <a href="email.html" class="px-3 py-2 rounded bg-gray-700 text-red-400 transition">Email</a>
-        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
-        <a href="forum.html" class="px-3 py-2 rounded hover:bg-gray-700 text-green-400 transition">Forum</a>
-        <a href="insights.html" class="px-3 py-2 rounded hover:bg-gray-700 text-yellow-400 transition">All Insights</a>
+<body class="bg-white min-h-screen flex flex-col">
+  <nav class="bg-[#F38020] text-black shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">Insight Dashboard</a>
+      <div class="flex gap-1 mt-2 sm:mt-0 text-sm">
+        <a href="insights.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">All Insights</a>
+        <a href="tickets.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Discord</a>
+        <a href="github.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">GitHub</a>
+        <a href="email.html" class="px-3 py-1.5 rounded bg-black text-white transition">Email</a>
+        <a href="twitter.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Forum</a>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-wrap justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold text-gray-800">Emails</h2>
-      <button onclick="loadData()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+  <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+    <div class="flex flex-wrap justify-between items-center mb-8">
+      <div>
+        <h1 class="text-2xl font-light tracking-tight text-black">Emails</h1>
+        <p id="total-emails" class="text-sm text-gray-500 mt-1"></p>
+      </div>
+      <button onclick="loadEmailData()" class="px-5 py-2 bg-[#F38020] text-black rounded-lg font-medium hover:bg-[#E57010] transition-colors">
         Refresh
       </button>
     </div>
 
-    <div id="loading" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent mx-auto"></div>
-    </div>
+    <div id="loading" class="hidden flex justify-center py-16">
+       <div class="w-10 h-10 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
+     </div>
 
-    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+     <div id="error" class="hidden bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6"></div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
-        <thead class="bg-red-600 text-white">
+     <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">Email ID</th>
-            <th class="px-6 py-3 text-left">Subject</th>
-            <th class="px-6 py-3 text-left">Sender</th>
-            <th class="px-6 py-3 text-left">Received</th>
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email ID</th>
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
           </tr>
         </thead>
-        <tbody id="data" class="divide-y divide-gray-200"></tbody>
+        <tbody id="data" class="divide-y divide-gray-50"></tbody>
       </table>
-    </div>
+     </div>
 
-    <div id="empty" class="hidden text-center py-12 text-gray-500">
-      No emails found
-    </div>
+     <!-- Similar Emails Modal -->
+     <div id="similar-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+       <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+           <h3 class="text-lg font-medium text-gray-900">Similar Emails</h3>
+           <button onclick="hideSimilarModal()" class="text-gray-400 hover:text-gray-600">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+             </svg>
+           </button>
+         </div>
+         <div id="similar-content" class="px-6 py-4 max-h-96 overflow-y-auto">
+           <div id="similar-loading" class="flex justify-center py-8">
+             <div class="w-8 h-8 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
+           </div>
+           <div id="similar-list" class="hidden space-y-3"></div>
+           <div id="similar-error" class="hidden text-center text-red-600 py-8">Failed to load similar emails</div>
+         </div>
+       </div>
+     </div>
+
+     <div id="empty" class="hidden text-center py-16 text-gray-400">
+       No emails found
+     </div>
   </main>
 
-  <script src="shared.js"></script>
-  <script>
-    async function loadData() {
+  <footer class="border-t border-gray-100 py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-400">
+      Insight Dashboard &mdash; Powered by Cloudflare Workers
+    </div>
+  </footer>
+
+   <script src="shared.js"></script>
+   <script>
+    async function loadEmailData() {
       showLoading('loading');
       hideError('error');
       try {
         const emails = await fetchEmail();
-        renderTable(emails);
+        renderEmailTable(emails);
       } catch (err) {
         showError('error', 'Failed to load emails: ' + err.message);
       } finally {
@@ -71,29 +101,88 @@
       }
     }
 
-    function renderTable(emails) {
+    function renderEmailTable(emails) {
       const tbody = document.getElementById('data');
       const empty = document.getElementById('empty');
+      const totalEmails = document.getElementById('total-emails');
 
       if (!emails || emails.length === 0) {
         tbody.innerHTML = '';
         empty.classList.remove('hidden');
+        totalEmails.textContent = '';
         return;
       }
 
       empty.classList.add('hidden');
-      tbody.innerHTML = emails.map(e => `
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-6 py-4">${e.id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${e.email_id}</td>
-          <td class="px-6 py-4 max-w-md truncate">${e.subject}</td>
-          <td class="px-6 py-4 font-mono text-sm">${e.sender}</td>
-          <td class="px-6 py-4 text-sm text-gray-600">${formatDate(e.received_at)}</td>
+      totalEmails.textContent = `${emails.length} emails`;
+
+      tbody.innerHTML = emails.map(email => `
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="showSimilarEmails('${email.email_id}')">
+          <td class="px-5 py-4 text-sm text-gray-900">${email.id}</td>
+          <td class="px-5 py-4 text-sm font-mono text-gray-600">${email.email_id}</td>
+          <td class="px-5 py-4 text-sm text-gray-900 max-w-xs truncate">${email.subject}</td>
+          <td class="px-5 py-4 text-sm font-mono text-gray-600">${email.sender}</td>
+          <td class="px-5 py-4 text-sm text-gray-500">${formatDate(email.received_at)}</td>
         </tr>
       `).join('');
     }
 
-    loadData();
+    async function showSimilarEmails(emailId) {
+      document.getElementById('similar-modal').classList.remove('hidden');
+      document.getElementById('similar-loading').classList.remove('hidden');
+      document.getElementById('similar-list').classList.add('hidden');
+      document.getElementById('similar-error').classList.add('hidden');
+
+      try {
+        const response = await fetchEmailSimilar(emailId);
+        const similarEmails = response.similar || [];
+
+        // Filter emails above 70% similarity and take top 3
+        const highSimilarityEmails = similarEmails
+          .filter(email => email.similarity > 0.7)
+          .slice(0, 3);
+
+        if (highSimilarityEmails.length === 0) {
+          document.getElementById('similar-list').innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <p class="text-sm">No emails found with >70% similarity</p>
+            </div>
+          `;
+        } else {
+          const listHtml = highSimilarityEmails.map(email => `
+            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-900 text-sm">${email.subject}</h4>
+                <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded font-medium">
+                  ${(email.similarity * 100).toFixed(1)}% match
+                </span>
+              </div>
+              <div class="text-xs text-gray-600 space-y-1">
+                <p><strong>Sender:</strong> ${email.sender}</p>
+                <p><strong>Received:</strong> ${formatDate(email.received_at)}</p>
+              </div>
+            </div>
+          `).join('');
+
+          document.getElementById('similar-list').innerHTML = listHtml;
+        }
+        document.getElementById('similar-loading').classList.add('hidden');
+        document.getElementById('similar-list').classList.remove('hidden');
+      } catch (err) {
+        console.error('Failed to load similar emails:', err);
+        document.getElementById('similar-loading').classList.add('hidden');
+        document.getElementById('similar-error').classList.remove('hidden');
+      }
+    }
+
+    function hideSimilarModal() {
+      document.getElementById('similar-modal').classList.add('hidden');
+    }
+
+    
+
+    // Initialize
+    loadEmailData();
   </script>
 </body>
 </html>

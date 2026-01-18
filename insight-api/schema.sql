@@ -48,8 +48,12 @@ CREATE TABLE IF NOT EXISTS emails (
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
     sender TEXT NOT NULL,
+    vector_id TEXT,
     received_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Add vector_id column if it doesn't exist (for existing databases)
+ALTER TABLE emails ADD COLUMN vector_id TEXT;
 
 -- Twitter Posts
 CREATE TABLE IF NOT EXISTS twitter_posts (

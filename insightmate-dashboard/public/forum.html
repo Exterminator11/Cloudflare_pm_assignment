@@ -6,93 +6,177 @@
   <title>Forum Posts - Insight Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <nav class="bg-gray-800 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-xl font-bold">Insight Dashboard</h1>
-      <div class="space-x-2 mt-2 sm:mt-0">
-        <a href="tickets.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Tickets</a>
-        <a href="discord.html" class="px-3 py-2 rounded hover:bg-gray-700 text-indigo-400 transition">Discord</a>
-        <a href="github.html" class="px-3 py-2 rounded hover:bg-gray-700 text-purple-400 transition">GitHub</a>
-        <a href="email.html" class="px-3 py-2 rounded hover:bg-gray-700 text-red-400 transition">Email</a>
-        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
-        <a href="forum.html" class="px-3 py-2 rounded bg-gray-700 text-green-400 transition">Forum</a>
-        <a href="insights.html" class="px-3 py-2 rounded hover:bg-gray-700 text-yellow-400 transition">All Insights</a>
+<body class="bg-white min-h-screen flex flex-col">
+  <nav class="bg-[#F38020] text-black shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">Insight Dashboard</a>
+      <div class="flex gap-1 mt-2 sm:mt-0 text-sm">
+        <a href="insights.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">All Insights</a>
+        <a href="tickets.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Discord</a>
+        <a href="github.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">GitHub</a>
+        <a href="email.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Email</a>
+        <a href="twitter.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-1.5 rounded bg-black text-white transition">Forum</a>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-wrap justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold text-gray-800">Forum Posts</h2>
-      <button onclick="loadData()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+  <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+    <div class="flex flex-wrap justify-between items-center mb-8">
+      <div>
+        <h1 class="text-2xl font-light tracking-tight text-black">Forum Posts</h1>
+        <p id="total-posts" class="text-sm text-gray-500 mt-1"></p>
+      </div>
+      <button onclick="loadData()" class="px-5 py-2 bg-[#F38020] text-black rounded-lg font-medium hover:bg-[#E57010] transition-colors">
         Refresh
       </button>
     </div>
 
-    <div id="loading" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent mx-auto"></div>
+    <div id="analysis-loading" class="hidden flex justify-center py-8">
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-gray-600">Analyzing forum discussions...</span>
+      </div>
     </div>
 
-    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+    <div id="error" class="hidden bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6"></div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
-        <thead class="bg-green-600 text-white">
-          <tr>
-            <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">Post ID</th>
-            <th class="px-6 py-3 text-left">Forum</th>
-            <th class="px-6 py-3 text-left">Title</th>
-            <th class="px-6 py-3 text-left">Author</th>
-            <th class="px-6 py-3 text-left">Created</th>
-          </tr>
-        </thead>
-        <tbody id="data" class="divide-y divide-gray-200"></tbody>
-      </table>
-    </div>
+    <div id="forum-content" class="space-y-8"></div>
 
-    <div id="empty" class="hidden text-center py-12 text-gray-500">
+    <div id="empty" class="hidden text-center py-16 text-gray-400">
       No forum posts found
     </div>
   </main>
 
+  <footer class="border-t border-gray-100 py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-400">
+      Insight Dashboard &mdash; Powered by Cloudflare Workers
+    </div>
+  </footer>
+
   <script src="shared.js"></script>
   <script>
     async function loadData() {
-      showLoading('loading');
       hideError('error');
+      document.getElementById('analysis-loading').classList.remove('hidden');
       try {
-        const posts = await fetchForum();
-        renderTable(posts);
+        const [posts, analysis] = await Promise.all([
+          fetchForum(),
+          fetchForumAnalysis()
+        ]);
+        renderForumGroups(analysis);
       } catch (err) {
         showError('error', 'Failed to load forum posts: ' + err.message);
       } finally {
-        hideLoading('loading');
+        document.getElementById('analysis-loading').classList.add('hidden');
       }
     }
 
-    function renderTable(posts) {
-      const tbody = document.getElementById('data');
+    function renderForumGroups(analysis) {
+      const container = document.getElementById('forum-content');
       const empty = document.getElementById('empty');
+      const totalPosts = document.getElementById('total-posts');
 
-      if (!posts || posts.length === 0) {
-        tbody.innerHTML = '';
+      if (!analysis.forums || analysis.forums.length === 0) {
+        container.innerHTML = '';
         empty.classList.remove('hidden');
+        totalPosts.textContent = '';
         return;
       }
 
       empty.classList.add('hidden');
-      tbody.innerHTML = posts.map(p => `
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-6 py-4">${p.id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${p.post_id}</td>
-          <td class="px-6 py-4 font-mono text-sm">${p.forum}</td>
-          <td class="px-6 py-4 max-w-md truncate">${p.title}</td>
-          <td class="px-6 py-4 font-mono text-sm">${p.author}</td>
-          <td class="px-6 py-4 text-sm text-gray-600">${formatDate(p.created_at)}</td>
-        </tr>
-      `).join('');
+      totalPosts.textContent = `${analysis.totalPosts} posts across ${analysis.forums.length} forums`;
+
+      container.innerHTML = analysis.forums.map((forum, index) => {
+        const isExpanded = false;
+
+        return `
+          <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-[#F38020]/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-[#F38020]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-medium text-gray-900">${forum.forum}</h2>
+                    <p class="text-sm text-gray-500">${forum.postCount} posts</p>
+                  </div>
+                </div>
+                <button onclick="toggleForum('forum-${index}')" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition flex items-center gap-1">
+                  <span class="toggle-text-${index}">${isExpanded ? 'Hide' : 'Show'}</span>
+                  <svg class="w-4 h-4 transition-transform toggle-icon-${index}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">AI Summary</h3>
+                <p class="text-sm text-gray-700 leading-relaxed">${forum.summary}</p>
+              </div>
+
+              ${forum.topTopics && forum.topTopics.length > 0 ? `
+                <div class="flex flex-wrap gap-2">
+                  ${forum.topTopics.map(topic => `
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F38020]/10 text-[#F38020]">
+                      ${topic}
+                    </span>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <div id="forum-${index}" class="forum-section ${isExpanded ? '' : 'hidden'}">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Post ID</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                  ${forum.posts.map(post => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                      <td class="px-5 py-4 text-sm font-mono text-gray-600">${post.post_id}</td>
+                      <td class="px-5 py-4 text-sm text-gray-900 max-w-md truncate">${post.title}</td>
+                      <td class="px-5 py-4 text-sm font-mono text-gray-600">${post.author}</td>
+                      <td class="px-5 py-4 text-sm text-gray-500">${formatDate(post.created_at)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${forum.postCount > 10 ? `
+                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100">
+                  <p class="text-sm text-gray-600">Showing 10 of ${forum.postCount} posts</p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleForum(forumId) {
+      const section = document.getElementById(forumId);
+      const index = forumId.replace('forum-', '');
+      const toggleText = document.querySelector(`.toggle-text-${index}`);
+      const toggleIcon = document.querySelector(`.toggle-icon-${index}`);
+
+      if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        toggleText.textContent = 'Hide';
+        toggleIcon.style.transform = 'rotate(180deg)';
+      } else {
+        section.classList.add('hidden');
+        toggleText.textContent = 'Show';
+        toggleIcon.style.transform = 'rotate(0deg)';
+      }
     }
 
     loadData();

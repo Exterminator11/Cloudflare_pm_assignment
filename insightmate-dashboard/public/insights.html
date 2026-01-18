@@ -3,171 +3,435 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aggregated Insights - Insight Dashboard</title>
+  <title>All Insights - Insight Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            tickets: '#3b82f6',
-            discord: '#5865f2',
-            github: '#8b5cf6',
-            email: '#ef4444',
-            twitter: '#1da1f2',
-            forum: '#10b981',
-          }
-        }
-      }
-    }
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <nav class="bg-gray-800 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-xl font-bold">Insight Dashboard</h1>
-      <div class="space-x-2 mt-2 sm:mt-0">
-        <a href="tickets.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Tickets</a>
-        <a href="discord.html" class="px-3 py-2 rounded hover:bg-gray-700 text-indigo-400 transition">Discord</a>
-        <a href="github.html" class="px-3 py-2 rounded hover:bg-gray-700 text-purple-400 transition">GitHub</a>
-        <a href="email.html" class="px-3 py-2 rounded hover:bg-gray-700 text-red-400 transition">Email</a>
-        <a href="twitter.html" class="px-3 py-2 rounded hover:bg-gray-700 text-blue-400 transition">Twitter</a>
-        <a href="forum.html" class="px-3 py-2 rounded hover:bg-gray-700 text-green-400 transition">Forum</a>
-        <a href="insights.html" class="px-3 py-2 rounded bg-gray-700 text-yellow-400 transition">All Insights</a>
+<body class="bg-white min-h-screen flex flex-col">
+  <nav class="bg-[#F38020] text-black shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">Insight Dashboard</a>
+      <div class="flex gap-1 mt-2 sm:mt-0 text-sm">
+        <a href="insights.html" class="px-3 py-1.5 rounded bg-black text-white transition">All Insights</a>
+        <a href="tickets.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Tickets</a>
+        <a href="discord.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Discord</a>
+        <a href="github.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">GitHub</a>
+        <a href="email.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Email</a>
+        <a href="twitter.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Twitter</a>
+        <a href="forum.html" class="px-3 py-1.5 rounded hover:bg-[#E57010] transition">Forum</a>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-wrap justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold text-gray-800">Aggregated Insights</h2>
-      <div class="flex space-x-2 mt-2 sm:mt-0">
-        <select id="filter" onchange="filterData()" class="border rounded px-3 py-2">
-          <option value="">All Sources</option>
-          <option value="tickets">Tickets</option>
-          <option value="discord">Discord</option>
-          <option value="github">GitHub</option>
-          <option value="email">Email</option>
-          <option value="twitter">Twitter</option>
-          <option value="forum">Forum</option>
-        </select>
-        <button onclick="loadData()" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition">
-          Refresh
-        </button>
+  <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+    <div class="flex flex-wrap justify-between items-center mb-8">
+      <div>
+        <h1 class="text-2xl font-light tracking-tight text-black">All Insights</h1>
+        <p id="last-updated" class="text-sm text-gray-500 mt-1"></p>
+      </div>
+      <button onclick="refreshData()" class="px-5 py-2 bg-[#F38020] text-black rounded-lg font-medium hover:bg-[#E57010] transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <div id="loading" class="hidden flex justify-center py-16">
+      <div class="w-10 h-10 border-2 border-[#F38020] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div id="error" class="hidden bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6"></div>
+
+    <div id="content" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <div class="lg:col-span-1 bg-white border border-gray-100 rounded-xl p-6">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Platform Score</h3>
+          <p id="platform-score" class="text-4xl font-bold text-gray-900">-</p>
+          <p class="text-xs text-gray-400 mt-1">Average of all 6 sources</p>
+        </div>
+        <div class="lg:col-span-3 flex justify-center items-center bg-white border border-gray-100 rounded-xl p-6">
+          <div class="w-64 h-64">
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-sky-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-sky-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Twitter</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Total Tweets</span>
+              <span id="twitter-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Sentiment Score</span>
+              <span id="twitter-score" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Forums</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Total Posts</span>
+              <span id="forum-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Forums</span>
+              <span id="forum-count" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Tickets</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Total Tickets</span>
+              <span id="tickets-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Open</span>
+              <span id="tickets-open" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">High Priority</span>
+              <span id="tickets-high" class="text-sm font-medium text-red-600">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">GitHub</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Total Issues</span>
+              <span id="github-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Open</span>
+              <span id="github-open" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Closed</span>
+              <span id="github-closed" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 0-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 1 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127c-.598.35-1.22.645-1.873.893a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Discord</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Messages</span>
+              <span id="discord-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Channels</span>
+              <span id="discord-channels" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Email</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Total Emails</span>
+              <span id="email-total" class="text-sm font-medium text-gray-900">-</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="loading" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-800 border-t-transparent mx-auto"></div>
-    </div>
-
-    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
-
-    <div id="summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"></div>
-
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
-        <thead class="bg-gray-800 text-white">
-          <tr>
-            <th class="px-6 py-3 text-left">Source</th>
-            <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">Content</th>
-            <th class="px-6 py-3 text-left">Status</th>
-            <th class="px-6 py-3 text-left">User</th>
-            <th class="px-6 py-3 text-left">Created</th>
-            <th class="px-6 py-3 text-left">Extras</th>
-          </tr>
-        </thead>
-        <tbody id="data" class="divide-y divide-gray-200"></tbody>
-      </table>
-    </div>
-
-    <div id="empty" class="hidden text-center py-12 text-gray-500">
-      No insights found. Click refresh to aggregate data.
+    <div id="empty" class="hidden text-center py-16 text-gray-400">
+      No data available
     </div>
   </main>
 
+  <footer class="border-t border-gray-100 py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-400">
+      Insight Dashboard &mdash; Powered by Cloudflare Workers
+    </div>
+  </footer>
+
   <script src="shared.js"></script>
   <script>
-    let allEvents = [];
+    const CACHE_TTL = 30 * 60 * 1000;
+    const CACHE_KEY = 'insights_cache';
+
+    function getCachedData() {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+      try {
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp > data.ttl) {
+          localStorage.removeItem(CACHE_KEY);
+          return null;
+        }
+        if (!data.data || !data.data.sources || !data.data.sources.github) {
+          localStorage.removeItem(CACHE_KEY);
+          return null;
+        }
+        return data.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setCachedData(data) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        ttl: CACHE_TTL,
+        data: data
+      }));
+    }
+
+    function clearCache() {
+      localStorage.removeItem(CACHE_KEY);
+    }
+
+    function formatLastUpdated(timestamp) {
+      const date = new Date(timestamp);
+      return `Last updated: ${date.toLocaleTimeString()}`;
+    }
+
+    async function refreshData() {
+      clearCache();
+      await loadData();
+    }
 
     async function loadData() {
       showLoading('loading');
       hideError('error');
+      document.getElementById('content').classList.add('hidden');
+
       try {
-        const result = await fetchInsights();
-        allEvents = result.events || [];
-        renderSummary();
-        renderTable(allEvents);
+        clearCache(); // Always fetch fresh data to get all sources
+
+        const [twitter, twitterSentiment, forum, tickets, github, discord, email] = await Promise.all([
+          fetchTwitter(),
+          fetchTwitterOverallSentiment().catch(() => ({ overall_score: 3, tweet_scores: [] })),
+          fetchForum().catch(() => []),
+          fetchTickets().catch(() => []),
+          fetchGithub().catch(() => []),
+          fetchDiscord().catch(() => []),
+          fetchEmail().catch(() => [])
+        ]);
+
+        console.log('Fetched data:', {
+          twitter: twitter?.length,
+          forum: forum?.length,
+          tickets: tickets?.length,
+          github: github?.length,
+          discord: discord?.length,
+          email: email?.length
+        });
+
+        const forumGroups = new Map();
+        (forum || []).forEach(post => {
+          const f = post.forum || 'General';
+          if (!forumGroups.has(f)) forumGroups.set(f, 0);
+          forumGroups.set(f, forumGroups.get(f) + 1);
+        });
+
+        const openTickets = (tickets || []).filter(t => t.status === 'open').length;
+        const highPriorityTickets = (tickets || []).filter(t => {
+          const content = (t.content || '').toLowerCase();
+          return content.includes('urgent') || content.includes('high priority') || content.includes('critical');
+        }).length;
+
+        const openGithub = (github || []).filter(i => i.state === 'open').length;
+        const closedGithub = (github || []).filter(i => i.state === 'closed').length;
+
+        const discordChannels = new Set((discord || []).map(m => m.channel_id)).size;
+        const discordMessages = (discord || []).length;
+
+        const emailTotal = (email || []).length;
+
+        const twitterScore = twitterSentiment.overall_score || 3;
+        const forumScore = Math.min(5, Math.max(1, 3 + Math.log10((forum || []).length + 1)));
+        const ticketScore = Math.round(((tickets?.length - openTickets) / (tickets?.length || 1)) * 4 + 1);
+        const githubScore = Math.round((closedGithub / (github?.length || 1)) * 4 + 1);
+        const discordScore = Math.min(5, Math.max(1, 3 + Math.log10(discordMessages + 1)));
+        const emailScore = 3;
+
+        const platformScore = (
+          twitterScore * 0.1667 +
+          forumScore * 0.1667 +
+          ticketScore * 0.1667 +
+          githubScore * 0.1667 +
+          discordScore * 0.1667 +
+          emailScore * 0.1667
+        );
+
+        const data = {
+          timestamp: Date.now(),
+          platform_score: platformScore,
+          sources: {
+            twitter: {
+              total: (twitter || []).length,
+              score: twitterScore
+            },
+            forums: {
+              total: (forum || []).length,
+              forums: forumGroups.size
+            },
+            tickets: {
+              total: (tickets || []).length,
+              open: openTickets,
+              high_priority: highPriorityTickets
+            },
+            github: {
+              total: (github || []).length,
+              open: openGithub,
+              closed: closedGithub
+            },
+            discord: {
+              total: discordMessages,
+              channels: discordChannels
+            },
+            email: {
+              total: emailTotal
+            }
+          },
+          distribution: [
+            (twitter || []).length || 0,
+            (forum || []).length || 0,
+            (tickets || []).length || 0,
+            (github || []).length || 0,
+            discordMessages || 0,
+            emailTotal || 0
+          ]
+        };
+
+        setCachedData(data);
+        renderData(data);
+        document.getElementById('last-updated').textContent = formatLastUpdated(data.timestamp);
       } catch (err) {
-        showError('error', 'Failed to load insights: ' + err.message);
+        console.error('Cache error, clearing and reloading:', err);
+        clearCache();
+        try {
+          await loadData();
+        } catch (e) {
+          showError('error', 'Failed to load insights: ' + e.message);
+        }
+        return;
       } finally {
         hideLoading('loading');
       }
     }
 
-    function renderSummary() {
-      const counts = {};
-      allEvents.forEach(e => {
-        counts[e.source] = (counts[e.source] || 0) + 1;
+    function renderData(data) {
+      document.getElementById('content').classList.remove('hidden');
+
+      document.getElementById('platform-score').textContent = (data.platform_score || 0).toFixed(1) + '/5';
+
+      document.getElementById('twitter-total').textContent = data.sources.twitter?.total || 0;
+      document.getElementById('twitter-score').textContent = (data.sources.twitter?.score || 0).toFixed(1) + '/5';
+
+      document.getElementById('forum-total').textContent = data.sources.forums?.total || 0;
+      document.getElementById('forum-count').textContent = data.sources.forums?.forums || 0;
+
+      document.getElementById('tickets-total').textContent = data.sources.tickets?.total || 0;
+      document.getElementById('tickets-open').textContent = data.sources.tickets?.open || 0;
+      document.getElementById('tickets-high').textContent = data.sources.tickets?.high_priority || 0;
+
+      document.getElementById('github-total').textContent = data.sources.github?.total || 0;
+      document.getElementById('github-open').textContent = data.sources.github?.open || 0;
+      document.getElementById('github-closed').textContent = data.sources.github?.closed || 0;
+
+      document.getElementById('discord-total').textContent = data.sources.discord?.total || 0;
+      document.getElementById('discord-channels').textContent = data.sources.discord?.channels || 0;
+
+      document.getElementById('email-total').textContent = data.sources.email?.total || 0;
+
+      renderPieChart(data.distribution);
+    }
+
+    function renderPieChart(data) {
+      const ctx = document.getElementById('pieChart');
+      if (!ctx) return;
+
+      if (window.pieChartInstance) {
+        window.pieChartInstance.destroy();
+      }
+
+      const labels = ['Twitter', 'Forums', 'Tickets', 'GitHub', 'Discord', 'Email'];
+      const colors = ['#1da1f2', '#10b981', '#3b82f6', '#8b5cf6', '#5865f2', '#ef4444'];
+
+      window.pieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 15,
+                usePointStyle: true,
+                font: { size: 12 }
+              }
+            }
+          }
+        }
       });
-
-      const container = document.getElementById('summary');
-      if (Object.keys(counts).length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-
-      container.innerHTML = Object.entries(counts).map(([source, count]) => {
-        const color = getColor(source);
-        return `
-          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-${color}-500">
-            <h3 class="text-lg font-semibold text-gray-700 capitalize">${source}</h3>
-            <p class="text-3xl font-bold text-${color}-600">${count}</p>
-            <p class="text-sm text-gray-500">Total events</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function filterData() {
-      const filter = document.getElementById('filter').value;
-      const filtered = filter ? allEvents.filter(e => e.source === filter) : allEvents;
-      renderTable(filtered);
-    }
-
-    function renderTable(events) {
-      const tbody = document.getElementById('data');
-      const empty = document.getElementById('empty');
-
-      if (!events || events.length === 0) {
-        tbody.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-      }
-
-      empty.classList.add('hidden');
-      tbody.innerHTML = events.map(e => {
-        const color = getColor(e.source);
-        return `
-          <tr class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4">
-              <span class="px-2 py-1 text-xs font-semibold bg-${color}-100 text-${color}-800 capitalize rounded">${e.source}</span>
-            </td>
-            <td class="px-6 py-4 font-mono text-sm">${e.id}</td>
-            <td class="px-6 py-4 max-w-md truncate">${e.content}</td>
-            <td class="px-6 py-4 text-sm">${e.status || '-'}</td>
-            <td class="px-6 py-4 font-mono text-sm">${e.user_id}</td>
-            <td class="px-6 py-4 text-sm text-gray-600">${formatDate(e.created_at)}</td>
-            <td class="px-6 py-4">
-              <details class="text-xs">
-                <summary class="cursor-pointer text-blue-600 hover:underline">View</summary>
-                <pre class="mt-2 p-2 bg-gray-100 rounded overflow-auto max-h-32 text-xs">${e.extras || '{}'}</pre>
-              </details>
-            </td>
-          </tr>
-        `;
-      }).join('');
     }
 
     loadData();
